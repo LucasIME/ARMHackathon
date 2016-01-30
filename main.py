@@ -4,8 +4,7 @@ import socket
 import pickle
 from scipy import arange
 from Speaker import *
-from multiprocessing.pool import ThreadPool
-
+import commands
 
 def finalPoint(pointList):
 	finalX = 0.0
@@ -44,52 +43,38 @@ def multilateration_thread( SpeakersList,  iStart, iStop, jStart, jStop, kStart,
     return fPointList
 
 def main():
-	s = socket.socket()
-	host = '172.23.72.51'
-	port = 1337
-	s.bind((host, port))
-	s.listen(5)
-	c, addr = s.accept()
-    pool = ThreadPool(processes=1)
+	# s = socket.socket()
+	# host = '172.23.72.51'
+	# port = 1337
+	# s.bind((host, port))
+	# s.listen(5)
+	# c, addr = s.accept()
+    # startTime = time.time()
     speedOfSound = 343
     SpeakerA = Speaker(0, 0, 0)
     SpeakerB = Speaker(10, 0, 0)
     SpeakerC = Speaker(0, 20, 0)
     SpeakerD = Speaker(5, 10, 5)
     SpeakersList = [SpeakerA, SpeakerB, SpeakerC, SpeakerD]
-    target = Object3D(9.2, 7.2, 3.1)
+    target = Object3D(9.2, 7.2, 3.9)
 
-    #Calculating needed constants
-    timeA = target.distanceTo(SpeakerA) / speedOfSound
-    timeB = target.distanceTo(SpeakerB) / speedOfSound
-    timeC = target.distanceTo(SpeakerC) / speedOfSound
-    timeD = target.distanceTo(SpeakerD) / speedOfSound
-    timeAB = timeA - timeB
-    timeBC = timeB - timeC
-    timeAC = timeA - timeC
-    timeAD = timeA - timeD
-    timeBD = timeB - timeD
-    timeCD = timeC - timeD
-    distAB  = timeAB * speedOfSound
-    distBC  = timeBC * speedOfSound
-    distAC  = timeAC * speedOfSound
-    distAD  = timeAD * speedOfSound
-    distBD  = timeBD * speedOfSound
-    distCD  = timeCD * speedOfSound
+    iStart = 0.0
+    iStop = 10.0
+    jStart = 0.0
+    jStop = 20.0
+    kStart = 0.0
+    kStop = 5.0
 
-    #assign 3 threads to do the multilateration calculation on different ranges
-    thread1 = pool.apply_async( multilateration_thread, (SpeakersList, 0.0, 10.0, 0.0, 7.0, 0.0, 5.0, distAB, distBC, distAC, distAD, distBD, distCD,) )
-    thread2 = pool.apply_async( multilateration_thread, (SpeakersList, 0.0, 10.0, 7.0, 14.0, 0.0, 5.0, distAB, distBC, distAC, distAD, distBD, distCD,) )
-    thread3 = pool.apply_async( multilateration_thread, (SpeakersList, 0.0, 10.0, 14.0, 20.0, 0.0, 5.0, distAB, distBC, distAC, distAD, distBD, distCD,) )
-    thread1Return = thread1.get(timeout=10)
-    thread2Return = thread2.get(timeout=10)
-    thread3Return = thread3.get(timeout=10)
-    pointList = thread1Return + thread2Return + thread3Return
-    pointList.sort()
-    finalPointOut = finalPoint(pointList)
+    cppRawOutput = commands.getstatusoutput("./cppCalculations %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s"
+                                         % (speedOfSound, SpeakerA.x, SpeakerA.y, SpeakerA.z, SpeakerB.x, SpeakerB.y, SpeakerB.z, SpeakerC.x, SpeakerC.y, SpeakerC.z, SpeakerD.x, SpeakerD.y, SpeakerD.z, target.x, target.y, target.z, iStart, iStop, jStart, jStop, kStart, kStop ))
+
+    finalCoordinates = [ float(numberString) for numberString in cppRawOutput[1].split() ]
+    finalPointOut = Object3D(finalCoordinates[0], finalCoordinates[1], finalCoordinates[2])
+    # finalTime = time.time() - startTime;
+    # print finalTime
     print finalPointOut
-    c.send(pickle.dumps(finalPointOut))
-    c.close()
+    # c.send(pickle.dumps(finalPointOut))
+    # c.close()
 
 if __name__ == '__main__':
     main()
