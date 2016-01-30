@@ -6,6 +6,19 @@ from scipy import arange
 from Speaker import *
 from multiprocessing.pool import ThreadPool
 
+def finalPoint(pointList):
+	finalX = 0.0
+	finalY = 0.0
+	finalZ = 0.0
+	weight = 0.0
+	for pair_in in pointList:
+		finalX += pair_in[1].x * (1/pair_in[0])
+		finalY += pair_in[1].y * (1/pair_in[0])
+		finalZ += pair_in[1].z * (1/pair_in[0])
+		weight += 1/pair_in[0]
+	final = Object3D((finalX / weight),(finalY / weight),(finalZ / weight))
+	return final
+	
 def multilateration_thread( SpeakersList,  iStart, iStop, jStart, jStop, kStart, kStop, distAB, distBC, distAC, distAD, distBD, distCD):
     fPointList = []
     stepIterationLength = 0.3
@@ -32,10 +45,10 @@ def multilateration_thread( SpeakersList,  iStart, iStop, jStart, jStop, kStart,
 def main():
     pool = ThreadPool(processes=1)
     speedOfSound = 343
-    SpeakerA = Speaker(1,2,3)
-    SpeakerB = Speaker(40, 20,30)
-    SpeakerC = Speaker(15, 14, 99)
-    SpeakerD = Speaker(9, 15, 13)
+    SpeakerA = Speaker(0, 0, 0)
+    SpeakerB = Speaker(10, 0, 0)
+    SpeakerC = Speaker(0, 20, 0)
+    SpeakerD = Speaker(5, 10, 5)
     SpeakersList = [SpeakerA, SpeakerB, SpeakerC, SpeakerD]
     target = Object3D(3.3, 14.6, 2.9)
 
@@ -66,6 +79,12 @@ def main():
     thread3Return = thread3.get(timeout=3)
     pointList = thread1Return + thread2Return + thread3Return
     pointList.sort()
+    finalPointOut = finalPoint()
+    print finalPointOut.x
+    print finalPointOut.y
+    print finalPointOut.z
+
+    #c.send(finalPoint(pointList))
 
 
 if __name__ == '__main__':
