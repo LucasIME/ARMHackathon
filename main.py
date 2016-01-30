@@ -74,9 +74,9 @@ def main():
     thread1 = pool.apply_async( multilateration_thread, (SpeakersList, 0.0, 10.0, 0.0, 7.0, 0.0, 5.0, distAB, distBC, distAC, distAD, distBD, distCD,) )
     thread2 = pool.apply_async( multilateration_thread, (SpeakersList, 0.0, 10.0, 7.0, 14.0, 0.0, 5.0, distAB, distBC, distAC, distAD, distBD, distCD,) )
     thread3 = pool.apply_async( multilateration_thread, (SpeakersList, 0.0, 10.0, 14.0, 20.0, 0.0, 5.0, distAB, distBC, distAC, distAD, distBD, distCD,) )
-    thread1Return = thread1.get(timeout=3)
-    thread2Return = thread2.get(timeout=3)
-    thread3Return = thread3.get(timeout=3)
+    thread1Return = thread1.get(timeout=10)
+    thread2Return = thread2.get(timeout=10)
+    thread3Return = thread3.get(timeout=10)
     pointList = thread1Return + thread2Return + thread3Return
     pointList.sort()
     finalPointOut = finalPoint(pointList)
