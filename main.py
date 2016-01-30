@@ -6,6 +6,7 @@ from scipy import arange
 from Speaker import *
 from multiprocessing.pool import ThreadPool
 
+
 def finalPoint(pointList):
 	finalX = 0.0
 	finalY = 0.0
@@ -43,6 +44,12 @@ def multilateration_thread( SpeakersList,  iStart, iStop, jStart, jStop, kStart,
     return fPointList
 
 def main():
+	s = socket.socket()
+	host = '172.23.72.51'
+	port = 1337
+	s.bind((host, port))
+	s.listen(5)
+	c, addr = s.accept()
     pool = ThreadPool(processes=1)
     speedOfSound = 343
     SpeakerA = Speaker(0, 0, 0)
@@ -81,9 +88,8 @@ def main():
     pointList.sort()
     finalPointOut = finalPoint(pointList)
     print finalPointOut
-
-    #c.send(finalPoint(pointList))
-
+    c.send(pickle.dumps(finalPointOut))
+    c.close()
 
 if __name__ == '__main__':
     main()
