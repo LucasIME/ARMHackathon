@@ -5,7 +5,7 @@
 #include <algorithm>
 #include <time.h>
 
-#define numArgs 23
+#define numArgs 24
 
 using namespace std;
 
@@ -64,6 +64,7 @@ vector<pair<float,Object3D> > multilateration_thread(vector<Object3D> SpeakersLi
                 float testBD  = distToSpeakerB - distToSpeakerD;
                 float testCD  = distToSpeakerC - distToSpeakerD;
                 float accuracy = sqrt( ((distAB - testAB)*(distAB - testAB)) + ((distBC - testBC)*(distBC - testBC)) + ((distAC - testAC)*(distAC - testAC)) + ((distAD - testAD)*(distAD - testAD)) + ((distBD -  testBD)*(distBD -  testBD)) + ((distCD - testCD)*(distCD - testCD)) );
+                //cout << accuracy << " " << currentPoint.x << currentPoint.y << currentPoint.z << endl;
                 if (accuracy <= 1){
                     pair<float, Object3D> entry = make_pair(accuracy, currentPoint);
                     fPointList.push_back(entry);
@@ -90,12 +91,12 @@ int main(int argc, char *argv[]) {
     SpeakersList.push_back(SpeakerB);
     SpeakersList.push_back(SpeakerC);
     SpeakersList.push_back(SpeakerD);
-    Object3D target(stof(argv[14]), stof(argv[15]), stof(argv[16]));
-    
-    float timeA = target.distanceTo(SpeakerA) / speedOfSound;
-    float timeB = target.distanceTo(SpeakerB) / speedOfSound;
-    float timeC = target.distanceTo(SpeakerC) / speedOfSound;
-    float timeD = target.distanceTo(SpeakerD) / speedOfSound;
+    //Object3D target(stof(argv[14]), stof(argv[15]), stof(argv[16]));
+
+    float timeA = stof(argv[14]);
+    float timeB = stof(argv[15]);
+    float timeC = stof(argv[16]);
+    float timeD = stof(argv[17]);
     float timeAB = timeA - timeB;
     float timeBC = timeB - timeC;
     float timeAC = timeA - timeC;
@@ -109,38 +110,10 @@ int main(int argc, char *argv[]) {
     float distBD  = timeBD * speedOfSound;
     float distCD  = timeCD * speedOfSound;
     
-//    float speedOfSound = 343;
-//    Object3D SpeakerA(0,0,0);
-//    Object3D SpeakerB(10,0,0);
-//    Object3D SpeakerC(0,20,0);
-//    Object3D SpeakerD(5,10,5);
-//    vector<Object3D> SpeakersList;
-//    SpeakersList.push_back(SpeakerA);
-//    SpeakersList.push_back(SpeakerB);
-//    SpeakersList.push_back(SpeakerC);
-//    SpeakersList.push_back(SpeakerD);
-//    Object3D target(9.2, 7.2, 3.1);
-//    
-//    float timeA = target.distanceTo(SpeakerA) / speedOfSound;
-//    float timeB = target.distanceTo(SpeakerB) / speedOfSound;
-//    float timeC = target.distanceTo(SpeakerC) / speedOfSound;
-//    float timeD = target.distanceTo(SpeakerD) / speedOfSound;
-//    float timeAB = timeA - timeB;
-//    float timeBC = timeB - timeC;
-//    float timeAC = timeA - timeC;
-//    float timeAD = timeA - timeD;
-//    float timeBD = timeB - timeD;
-//    float timeCD = timeC - timeD;
-//    float distAB  = timeAB * speedOfSound;
-//    float distBC  = timeBC * speedOfSound;
-//    float distAC  = timeAC * speedOfSound;
-//    float distAD  = timeAD * speedOfSound;
-//    float distBD  = timeBD * speedOfSound;
-//    float distCD  = timeCD * speedOfSound;
-    
-    vector<pair<float, Object3D> > pointList = multilateration_thread(SpeakersList, stof(argv[17]), stof(argv[18]), stof(argv[19]), stof(argv[20]), stof(argv[21]), stof(argv[22]), distAB, distBC, distAC, distAD, distBD, distCD);
+    vector<pair<float, Object3D> > pointList = multilateration_thread(SpeakersList, stof(argv[18]), stof(argv[19]), stof(argv[20]), stof(argv[21]), stof(argv[22]), stof(argv[23]), distAB, distBC, distAC, distAD, distBD, distCD);
+
     sort(pointList.begin(), pointList.end());
-    
+
     Object3D finalPointOut = finalPoint(pointList);
     
     cout << finalPointOut.x << " " << finalPointOut.y << " " << finalPointOut.z << endl;

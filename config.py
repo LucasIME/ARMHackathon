@@ -1,6 +1,8 @@
 from Speaker import *
 
-hostIP = '172.23.72.51'
+wavFileName = "4_8KHz_beep_Noise_Proper.wav"
+
+host = '172.23.72.51'
 port = 1337
 
 SpeakerA = Speaker(0, 0, 0)

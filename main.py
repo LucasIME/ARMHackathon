@@ -1,36 +1,46 @@
 import math
 import time
 import socket
-import pickle
+import json
 from scipy import arange
 from Speaker import *
 import commands
 from config import *
+from PulseDetection import getTimesList
+from micController import getAndRecordAudio
 
 def main():
-	# s = socket.socket()
-	# s.bind((host, port))
-	# s.listen(5)
-	# c, addr = s.accept()
-
-    # startTime = time.time()
+	s = socket.socket()
+	s.bind((host, port))
+	s.listen(5)
+	c, addr = s.accept()
 
     SpeakersList = [SpeakerA, SpeakerB, SpeakerC, SpeakerD]
-    target = Object3D(9.2, 7.2, 3.9)
 
-    cppRawOutput = commands.getstatusoutput("./cppCalculations %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s"
-                                         % (speedOfSound, SpeakerA.x, SpeakerA.y, SpeakerA.z, SpeakerB.x, SpeakerB.y, SpeakerB.z, SpeakerC.x, SpeakerC.y, SpeakerC.z, SpeakerD.x, SpeakerD.y, SpeakerD.z, target.x, target.y, target.z, iStart, iStop, jStart, jStop, kStart, kStop ))
-    finalCoordinates = [ float(numberString) for numberString in cppRawOutput[1].split() ]
+    while(True):
 
-    finalPointOut = Object3D(finalCoordinates[0], finalCoordinates[1], finalCoordinates[2])
+        getAndRecordAudio()
 
-    # finalTime = time.time() - startTime;
-    # print finalTime
+        timesList = getTimesList()
+        print timesList
+        timeA = timesList[0]
+        timeB = timesList[1]
+        timeC = timesList[2]
+        timeD = timesList[3]
 
-    print finalPointOut
-    
-    # c.send(pickle.dumps(finalPointOut))
-    # c.close()
+        cppRawOutput = commands.getstatusoutput("./cppCalculations %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s"
+                                             % (speedOfSound, SpeakerA.x, SpeakerA.y, SpeakerA.z, SpeakerB.x, SpeakerB.y, SpeakerB.z, SpeakerC.x, SpeakerC.y, SpeakerC.z, SpeakerD.x, SpeakerD.y, SpeakerD.z, timeA, timeB, timeC, timeD, iStart, iStop, jStart, jStop, kStart, kStop ))
+
+        #print(cppRawOutput)
+        finalCoordinates = [ float(numberString) for numberString in cppRawOutput[1].split() ]
+
+        finalPointOut = Object3D(finalCoordinates[0], finalCoordinates[1], finalCoordinates[2])
+
+        print finalPointOut
+        sendFinal = [finalPointOut.x, finalPointOut.y, finalPointOut.z]
+
+        c.send(json.dumps(sendFinal))
+    c.close()
 
 if __name__ == '__main__':
     main()
