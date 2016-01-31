@@ -1,6 +1,6 @@
 from Speaker import *
 
-wavFileName = "4_8KHz_beep_Noise_Proper.wav"
+wavFileName = "output.wav"
 
 host = '172.23.72.51'
 port = 1337

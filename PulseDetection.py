@@ -17,25 +17,23 @@ def detection(array_of_samples):
     flag = 0
 
     for x in range(0, len(array_of_samples) - len(array_of_samples)%64, 64):
-        fft_of_samples = array_of_samples[x:x+63]
+        fft_of_samples = array_of_samples[x:x+64]
         fft_of_samples = fft(fft_of_samples)
         fft_of_samples = [ abs(j) for j in fft_of_samples ]
-        fft_of_samples = fft_of_samples[0:31]
+        fft_of_samples = fft_of_samples[0:32]
 
         if flag > 0:
-            if fft_of_samples[13] > LIMIT:
+            if fft_of_samples[12] > LIMIT:
                 flag += 1
-                Average += fft_of_samples[13]
             else:
                 flag = 0                            #Carry on searching afresh
 
-        if flag == 0 and fft_of_samples[13] > LIMIT:
+        if flag == 0 and fft_of_samples[12] > LIMIT:
             # If we enter here we think we've detected the arrival of a pulse.
             # BUT to confirm it's not just noise we take a few more subsequent chunks and analyse them to see for sure
             Timestamp_Pulse = x
             flag = 1
             old_chunk = x / 64
-            Average = fft_of_samples[13]
 
         if flag == 3:                               #We're pretty sure now that we've just received a pulse not just noise
             return (Timestamp_Pulse)
