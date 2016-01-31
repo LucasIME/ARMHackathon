@@ -5,7 +5,7 @@ import math
 from scipy.io.wavfile import read
 from config import wavFileName
 
-LIMIT = 20000
+LIMIT = 15000
 CONSEQUITIVE = 3
 
 WAIT_SAMPLES = 3000
@@ -14,7 +14,6 @@ END_REACHED = 200000
 
 def detection(array_of_samples):
     flag = 0
-
     for x in range(0, len(array_of_samples) - len(array_of_samples)%64, 64):
         fft_of_samples = array_of_samples[x:x+64]
         fft_of_samples = fft(fft_of_samples)
@@ -27,7 +26,7 @@ def detection(array_of_samples):
             else:
                 flag = 0                            #Carry on searching afresh
 
-        if flag == 0 and fft_of_samples[12] > LIMIT:
+        if flag == 0 and (fft_of_samples[12] > LIMIT):
             # If we enter here we think we've detected the arrival of a pulse.
             # BUT to confirm it's not just noise we take a few more subsequent chunks and analyse them to see for sure
             Timestamp_Pulse = x
@@ -44,7 +43,8 @@ def getTimesList():
     Time_of_Pulse = []
     Number_of_Pulses = 0
 
-    (sampling_rate, array) = read(wavFileName)
+    (sampling_rate, array_2) = read(wavFileName)
+    array = [ x[0] for x in array_2]
 
     Temp = detection(array)
     if Temp == END_REACHED:

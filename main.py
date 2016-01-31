@@ -10,18 +10,21 @@ from PulseDetection import getTimesList
 from micController import getAndRecordAudio
 
 def main():
-	s = socket.socket()
-	s.bind((host, port))
-	s.listen(5)
-	c, addr = s.accept()
-
+    # s = socket.socket()
+    # s.bind((host, port))
+    # s.listen(5)
+    # c, addr = s.accept()
     SpeakersList = [SpeakerA, SpeakerB, SpeakerC, SpeakerD]
 
     while(True):
 
+        import os
+        os.system("rm -f output.wav")
         getAndRecordAudio()
 
         timesList = getTimesList()
+        if len(timesList) != 4:
+            continue
         print timesList
         timeA = timesList[0]
         timeB = timesList[1]
@@ -39,8 +42,8 @@ def main():
         print finalPointOut
         sendFinal = [finalPointOut.x, finalPointOut.y, finalPointOut.z]
 
-        c.send(json.dumps(sendFinal))
-    c.close()
+    #     c.send(json.dumps(sendFinal))
+    # c.close()
 
 if __name__ == '__main__':
     main()
