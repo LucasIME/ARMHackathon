@@ -1,4 +1,3 @@
-
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.fftpack import fft #using fft
@@ -6,11 +5,11 @@ import math
 from scipy.io.wavfile import read
 from config import wavFileName
 
-LIMIT = 120000
+LIMIT = 20000
+CONSEQUITIVE = 3
+
 WAIT_SAMPLES = 3000
-
 WINDOW_MAX = 300
-
 END_REACHED = 200000
 
 def detection(array_of_samples):
@@ -35,7 +34,7 @@ def detection(array_of_samples):
             flag = 1
             old_chunk = x / 64
 
-        if flag == 3:                               #We're pretty sure now that we've just received a pulse not just noise
+        if flag == CONSEQUITIVE:                               #We're pretty sure now that we've just received a pulse not just noise
             return (Timestamp_Pulse)
 
     return(END_REACHED)
@@ -44,14 +43,17 @@ def detection(array_of_samples):
 def getTimesList():
     Time_of_Pulse = []
     Number_of_Pulses = 0
-    Wanted_Timestamps = []
 
     (sampling_rate, array) = read(wavFileName)
 
-    Time_of_Pulse.append(detection(array))
+    Temp = detection(array)
+    if Temp == END_REACHED:
+        print("No pulses detected.")
+        return([])
+
+    Time_of_Pulse.append(Temp)
     array = array[(Time_of_Pulse[0] + WAIT_SAMPLES):]
     Time_of_Pulse[0] /= 44.1
-    #print("Pulse 0: " + str(Time_of_Pulse[0]))
 
     for x in range(1, 8):
         Temp = detection(array)
@@ -64,14 +66,24 @@ def getTimesList():
         Time_of_Pulse[x] /= 44.1
         Time_of_Pulse[x] += Time_of_Pulse[x - 1] + (WAIT_SAMPLES / 44.1)
 
-
     #------------
+    print(Number_of_Pulses)
+    if Number_of_Pulses < 5:
+        print("This is not enough pulses!")
+        return([])
+
     for x in range(1, Number_of_Pulses):
         TimeDiff = Time_of_Pulse[x] - Time_of_Pulse[x - 1]
-        if (TimeDiff > WINDOW_MAX):
+        if (TimeDiff > WINDOW_MAX and (Number_of_Pulses >= x + 3)):  #When we find the first pulse
             # print(Time_of_Pulse[x])
             # print(Time_of_Pulse[x+1] - 200)
             # print(Time_of_Pulse[x+2] - 400)
             # print(Time_of_Pulse[x+3] - 600)
             responseVector = [ Time_of_Pulse[x], Time_of_Pulse[x+1] - 200, Time_of_Pulse[x+2] - 400, Time_of_Pulse[x+3] - 600 ]
+
+            responseVector_Test = responseVector
+            responseVector_Test.sort()
+            if(responseVector_Test[3] - responseVector_Test[0] > 50):
+                return([])
             return responseVector
+    return([])
