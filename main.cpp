@@ -64,11 +64,12 @@ vector<pair<float,Object3D> > multilateration_thread(vector<Object3D> SpeakersLi
                 float testBD  = distToSpeakerB - distToSpeakerD;
                 float testCD  = distToSpeakerC - distToSpeakerD;
                 float accuracy = sqrt( ((distAB - testAB)*(distAB - testAB)) + ((distBC - testBC)*(distBC - testBC)) + ((distAC - testAC)*(distAC - testAC)) + ((distAD - testAD)*(distAD - testAD)) + ((distBD -  testBD)*(distBD -  testBD)) + ((distCD - testCD)*(distCD - testCD)) );
-                //cout << accuracy << " " << currentPoint.x << currentPoint.y << currentPoint.z << endl;
-                if (accuracy <= 1){
+
+                //if (accuracy <= 80){
+                    //cout << accuracy << " " << currentPoint.x << currentPoint.y << currentPoint.z << endl;
                     pair<float, Object3D> entry = make_pair(accuracy, currentPoint);
                     fPointList.push_back(entry);
-                }
+                //}
             }
         }
     }
@@ -109,9 +110,10 @@ int main(int argc, char *argv[]) {
     float distAD  = timeAD * speedOfSound;
     float distBD  = timeBD * speedOfSound;
     float distCD  = timeCD * speedOfSound;
-    
-    vector<pair<float, Object3D> > pointList = multilateration_thread(SpeakersList, stof(argv[18]), stof(argv[19]), stof(argv[20]), stof(argv[21]), stof(argv[22]), stof(argv[23]), distAB, distBC, distAC, distAD, distBD, distCD);
 
+    //cout  << distAB << " " << distBC << " " << distAC << " " << distAD << " " << distBD << " " << distCD << endl;
+    vector<pair<float, Object3D> > pointList = multilateration_thread(SpeakersList, stof(argv[18]), stof(argv[19]), stof(argv[20]), stof(argv[21]), stof(argv[22]), stof(argv[23]), distAB, distBC, distAC, distAD, distBD, distCD);
+    //for(int i=0; i < pointList.size(); i++) cout << pointList[i].first << " " << pointList[i].second.x << pointList[i].second.y << pointList[i].second.z << endl;
     sort(pointList.begin(), pointList.end());
 
     Object3D finalPointOut = finalPoint(pointList);

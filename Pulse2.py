@@ -5,8 +5,9 @@ import math
 from scipy.io.wavfile import read
 from config import wavFileName
 
-LIMIT = 15000
-CONSEQUITIVE = 3
+
+LIMIT = 20000           #Reducing this increases the sensitivity towards 8KHz pulses at the risk of detecting accidental pulse.
+CONSEQUITIVE = 3        #This is how many successive chunks need to have 8KHz above threshold (ie. LIMIT) to count as a pulse
 
 WAIT_SAMPLES = 3000
 WINDOW_MAX = 300
@@ -14,6 +15,7 @@ END_REACHED = 200000
 
 def detection(array_of_samples):
     flag = 0
+
     for x in range(0, len(array_of_samples) - len(array_of_samples)%64, 64):
         fft_of_samples = array_of_samples[x:x+64]
         fft_of_samples = fft(fft_of_samples)
@@ -26,14 +28,13 @@ def detection(array_of_samples):
             else:
                 flag = 0                            #Carry on searching afresh
 
-        if flag == 0 and (fft_of_samples[12] > LIMIT):
+        if flag == 0 and fft_of_samples[12] > LIMIT:
             # If we enter here we think we've detected the arrival of a pulse.
             # BUT to confirm it's not just noise we take a few more subsequent chunks and analyse them to see for sure
             Timestamp_Pulse = x
             flag = 1
-            old_chunk = x / 64
 
-        if flag == CONSEQUITIVE:                               #We're pretty sure now that we've just received a pulse not just noise
+        if flag == CONSEQUITIVE:                    #We're pretty sure now that we've just received a pulse not just noise - return!
             return (Timestamp_Pulse)
 
     return(END_REACHED)
@@ -43,9 +44,7 @@ def getTimesList():
     Time_of_Pulse = []
     Number_of_Pulses = 0
 
-    (sampling_rate, array_2) = read(wavFileName)
-    #array = [ x[0] for x in array_2]
-    array = array_2
+    (sampling_rate, array) = read(wavFileName)
 
     Temp = detection(array)
     if Temp == END_REACHED:
@@ -88,3 +87,5 @@ def getTimesList():
                 return([])
             return responseVector
     return([])
+
+print(getTimesList())
